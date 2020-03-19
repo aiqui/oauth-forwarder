@@ -8,8 +8,15 @@ if (isset($_REQUEST['code']) && isset($_REQUEST['state'])) {
     if ($aUrl !== false) {
         
         // Set the new location using the state
-        $sLocation = sprintf("%s://%s%s?code=%s", $aUrl['scheme'], $aUrl['host'],
-                             $aUrl['path'], urlencode($_REQUEST['code']));
+        $sLocation = sprintf("%s://%s%s%s?code=%s",
+            $aUrl['scheme'],
+            $aUrl['host'],
+            $aUrl['port'] ?? '',
+            $aUrl['path'],
+            urlencode($_REQUEST['code'])
+        );
+
+        // Add any existing parameters
         if (isset($aUrl['query'])) {
             $sLocation .= '&' . $aUrl['query'];
         }
@@ -20,18 +27,20 @@ if (isset($_REQUEST['code']) && isset($_REQUEST['state'])) {
     }
 }
 
-// Unless forwarding was successful, the error message will appear
+// Forwarding failed - log error and provide an error message
+error_log('oauth redirect failed, request: ' . json_encode($_REQUEST));
+
 ?>
-<html>
+<html lang="en">
 <head>
-<meta http-equiv="content-type" content="text/html;charset=ISO-8859-1">
-         <title>Authorization Failed</title>
-         </head>
+    <meta http-equiv="content-type" content="text/html;charset=ISO-8859-1">
+    <title>Authorization Failed</title>
+</head>
 
-         <body>
+<body>
 
-         <h1>Authorization Failed</h1>
+<h1>Authorization Failed</h1>
 
-    </body>
-    </html>
+</body>
+</html>
 
