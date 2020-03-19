@@ -10,19 +10,18 @@ function getUserIp () {
         $_SERVER['REMOTE_ADDR']    = $_SERVER["HTTP_CF_CONNECTING_IP"];
         $_SERVER['HTTP_CLIENT_IP'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
     }
-    $client  = @$_SERVER['HTTP_CLIENT_IP'];
-    $forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
-    $remote  = $_SERVER['REMOTE_ADDR'];
+    $sClient  = $_SERVER['HTTP_CLIENT_IP'] ?? null;
+    $sForward = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? null;
+    $sRemote  = $_SERVER['REMOTE_ADDR'];
 
-    if (filter_var($client, FILTER_VALIDATE_IP)) {
-        $ip = $client;
-    } else if (filter_var($forward, FILTER_VALIDATE_IP)) {
-        $ip = $forward;
+    if ($sClient && filter_var($sClient, FILTER_VALIDATE_IP)) {
+        $sIpAddress = $sClient;
+    } else if ($sForward && filter_var($sForward, FILTER_VALIDATE_IP)) {
+        $sIpAddress = $sForward;
     } else {
-        $ip = $remote;
+        $sIpAddress = $sRemote;
     }
-
-    return $ip;
+    return $sIpAddress;
 }
 
 /**
