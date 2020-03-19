@@ -6,23 +6,9 @@ require_once('./config.php');
  * @return string
  */
 function getUserIp () {
-    if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
-        $_SERVER['REMOTE_ADDR']    = $_SERVER["HTTP_CF_CONNECTING_IP"];
-        $_SERVER['HTTP_CLIENT_IP'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
-    }
-    $sClient  = $_SERVER['HTTP_CLIENT_IP'] ?? null;
-    $sForward = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? null;
-    $sRemote  = $_SERVER['REMOTE_ADDR'];
-
-    if ($sClient && filter_var($sClient, FILTER_VALIDATE_IP)) {
-        $sIpAddress = $sClient;
-    } else if ($sForward && filter_var($sForward, FILTER_VALIDATE_IP)) {
-        $sIpAddress = $sForward;
-    } else {
-        $sIpAddress = $sRemote;
-    }
-    return $sIpAddress;
+    return $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
 }
+
 
 /**
  * @return PDO
