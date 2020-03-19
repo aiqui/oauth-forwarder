@@ -1,0 +1,10 @@
+<?php
+
+define('DB_HOST', 'localhost');
+define('DB_USER', 'USER');
+define('DB_PW', 'PW');
+define('DB_PORT', null);
+define('DB_NAME', 'DB');
+
+
+
