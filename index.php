@@ -29,20 +29,25 @@ function getPdo () {
  * @param string $sCode
  * @param string $sState
  * @param string $sRedirect
+ * @param string $sReferrer
  * @param bool $bSuccess
  * @return void
  */
-function saveLog (string $sCode, string $sState, string $sRedirect, bool $bSuccess = true) {
+function saveLog (string $sCode, string $sState, string $sRedirect, string $sReferrer, bool $bSuccess = true) {
     $oStmt = getPdo()->prepare(
-        "INSERT INTO  oauth_redirect_log (ip_address, code, state, redirect, success)
-              VALUES  (:ip_address, :code, :state, :redirect, :success)");
+        "INSERT INTO  oauth_forward_log (ip_address, code, state, redirect, referrer, success)
+              VALUES  (:ip_address, :code, :state, :redirect, :referrer, :success)");
     $oStmt->execute(
         [':ip_address' => getUserIp(),
          ':code'       => $sCode,
          ':state'      => $sState,
          ':redirect'   => $sRedirect,
+         ':referrer'   => $sReferrer,
          ':success'    => $bSuccess ? 1 : 0]);
 }
+
+// Referrer should be defined
+$sReferrer = $_SERVER["HTTP_REFERER"] ?? 'none';
 
 // Both the code and state are set
 if (isset($_REQUEST['code']) && isset($_REQUEST['state'])) {
@@ -51,7 +56,7 @@ if (isset($_REQUEST['code']) && isset($_REQUEST['state'])) {
     $aUrl = parse_url($_REQUEST['state']);
     if ($aUrl !== false && isset($aUrl['scheme']) && isset($aUrl['host']) && isset($aUrl['path'])) {
 
-        $sPort = isset($aUrl['port']) ? ':' . $aUrl['port'] : '';
+        $sPort  = isset($aUrl['port']) ? ':' . $aUrl['port'] : '';
         $sQuery = isset($aUrl['query']) ? '&' . $aUrl['query'] : '';
 
         // Set the new location using the state
@@ -65,7 +70,7 @@ if (isset($_REQUEST['code']) && isset($_REQUEST['state'])) {
         );
 
         // Save to the log
-        saveLog($_REQUEST['code'], $_REQUEST['state'], $sLocation);
+        saveLog($_REQUEST['code'], $_REQUEST['state'], $sLocation, $sReferrer);
 
         // Redirect and exit
         header("Location: " . $sLocation);
@@ -76,7 +81,7 @@ if (isset($_REQUEST['code']) && isset($_REQUEST['state'])) {
 // Forwarding failed - log error and provide an error message
 $sCode  = $_REQUEST['code'] ?? 'none';
 $sState = $_REQUEST['state'] ?? 'none';
-saveLog($sCode, $sState, 'none', false);
+saveLog($sCode, $sState, 'none', $sReferrer, false);
 error_log('oauth redirect failed, request: ' . json_encode($_REQUEST));
 
 ?>
