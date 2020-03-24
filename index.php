@@ -29,25 +29,25 @@ function getPdo () {
  * @param string $sCode
  * @param string $sState
  * @param string $sRedirect
- * @param string $sReferrer
+ * @param string $sUserAgent
  * @param bool $bSuccess
  * @return void
  */
-function saveLog (string $sCode, string $sState, string $sRedirect, string $sReferrer, bool $bSuccess = true) {
+function saveLog (string $sCode, string $sState, string $sRedirect, string $sUserAgent, bool $bSuccess = true) {
     $oStmt = getPdo()->prepare(
-        "INSERT INTO  oauth_forward_log (ip_address, code, state, redirect, referrer, success)
-              VALUES  (:ip_address, :code, :state, :redirect, :referrer, :success)");
+        "INSERT INTO  oauth_forward_log (ip_address, code, state, redirect, agent, success)
+              VALUES  (:ip_address, :code, :state, :redirect, :agent, :success)");
     $oStmt->execute(
         [':ip_address' => getUserIp(),
          ':code'       => $sCode,
          ':state'      => $sState,
          ':redirect'   => $sRedirect,
-         ':referrer'   => $sReferrer,
+         ':agent'      => $sUserAgent,
          ':success'    => $bSuccess ? 1 : 0]);
 }
 
-// Referrer should be defined
-$sReferrer = $_SERVER["HTTP_REFERER"] ?? 'none';
+// Client agent should be defined
+$sUserAgent = $_SERVER["HTTP_USER_AGENT"] ?? 'none';
 
 // Both the code and state are set
 if (isset($_REQUEST['code']) && isset($_REQUEST['state'])) {
@@ -70,7 +70,7 @@ if (isset($_REQUEST['code']) && isset($_REQUEST['state'])) {
         );
 
         // Save to the log
-        saveLog($_REQUEST['code'], $_REQUEST['state'], $sLocation, $sReferrer);
+        saveLog($_REQUEST['code'], $_REQUEST['state'], $sLocation, $sUserAgent);
 
         // Redirect and exit
         header("Location: " . $sLocation);
@@ -80,8 +80,8 @@ if (isset($_REQUEST['code']) && isset($_REQUEST['state'])) {
 
 // Forwarding failed - log error and provide an error message
 $sCode  = $_REQUEST['code'] ?? 'none';
-$sState = $_REQUEST['state'] ?? 'none';
-saveLog($sCode, $sState, 'none', $sReferrer, false);
+$sState     = $_REQUEST['state'] ?? 'none';
+saveLog($sCode, $sState, 'none', $sUserAgent, false);
 error_log('oauth redirect failed, request: ' . json_encode($_REQUEST));
 
 ?>

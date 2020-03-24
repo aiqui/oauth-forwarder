@@ -4,7 +4,7 @@ CREATE TABLE `oauth_forward_log` (
   `ip_address` varchar(40) DEFAULT NULL,
   `code` varchar(255) DEFAULT NULL,
   `state` varchar(255) DEFAULT NULL,
-  `referrer` varchar(255) DEFAULT NULL,
+  `agent` varchar(255) DEFAULT NULL,
   `redirect` varchar(255) DEFAULT NULL,
   `success` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`log_id`),
